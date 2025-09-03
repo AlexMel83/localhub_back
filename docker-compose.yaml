@@ -4,10 +4,10 @@ services:
     image: postgis/postgis:16-master
     env_file:
       - .env
-    expose:
-      - ${POSTGRES_PORT}
     ports:
-      - ${POSTGRES_PORT}:5432
+      - '5433:5432'
+    expose:
+      - '5432'
     environment:
       PG_DATA: /var/lib/postgresql/data
       POSTGRES_DB: ${POSTGRES_DB}
@@ -32,9 +32,9 @@ services:
       - ${PORT}:4040
     ports:
       - ${PORT}:4040
-    command: sh -c "npm run db:setup && npm run start"
     depends_on:
       - postgres
+    command: sh -c "npm run db:setup && npm run start"
     restart: always
 
 volumes:
