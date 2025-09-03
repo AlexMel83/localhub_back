@@ -40,11 +40,14 @@ export const up = async (knex) => {
       table.increments('id').primary().notNullable();
       table.integer('user_id').notNullable();
       table.string('title', 100).nullable();
+      table.string('slug', 200).notNullable();
       table.text('description').nullable();
+      table.string('type').notNullable().defaultTo('store');
       table.string('address').nullable();
       table.string('contacts').nullable();
       table.string('working_hours').nullable();
       table.string('price').nullable();
+      table.float('rating').nullable();
       table.timestamp('shooting_date').defaultTo(knex.fn.now()).notNullable();
       table.decimal('latitude_fact', 9, 7);
       table.decimal('longitude_fact', 9, 7);

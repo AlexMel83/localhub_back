@@ -5,6 +5,9 @@ const storesFields = [
   'stores.id',
   'stores.user_id',
   'stores.title',
+  'stores.slug',
+  'stores.type',
+  'stores.rating',
   'stores.description',
   'stores.address',
   'stores.contacts',
@@ -30,8 +33,8 @@ const storesFields = [
 
 const conditionHandlers = {
   id: (storesQuery, value) => storesQuery.where('stores.id', value),
-  user_id: (storesQuery, value) =>
-    storesQuery.where('stores.user_id', value),
+  slug: (storesQuery, value) => storesQuery.where('stores.slug', value),
+  user_id: (storesQuery, value) => storesQuery.where('stores.user_id', value),
   title: (storesQuery, value) =>
     storesQuery.where('stores.title', 'ilike', `%${value}%`),
   description: (storesQuery, value) =>

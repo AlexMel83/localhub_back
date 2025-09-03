@@ -8,6 +8,10 @@ const validateQueryStores = [
     .optional({ checkFalsy: true })
     .isNumeric()
     .withMessage('id is number'),
+  query('slug')
+    .optional({ checkFalsy: true })
+    .isString()
+    .withMessage('slug is string'),
   query('user_id')
     .optional({ checkFalsy: true })
     .isNumeric()

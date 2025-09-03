@@ -3,6 +3,7 @@ import storesModel from '../../data-layer/models/stores-model.js';
 
 const queryMappings = {
   id: 'id',
+  slug: 'slug',
   user_id: 'user_id',
   title: 'title',
   description: 'description',

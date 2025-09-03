@@ -17,25 +17,25 @@ services:
       - ./pgdata:/var/lib/postgresql/data
     restart: always
 
-  # api:
-  #   container_name: localhub_api
-  #   build:
-  #     context: ./
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - IS_DOCKER=true
-  #   volumes:
-  #     - ./:/app
-  #     - /app/node_modules
-  #   expose:
-  #     - ${PORT}:4040
-  #   ports:
-  #     - ${PORT}:4040
-  #   command: sh -c "npm run db:setup && npm run start"
-  #   depends_on:
-  #     - postgres
-  #   restart: always
+  api:
+    container_name: localhub_api
+    build:
+      context: ./
+    env_file:
+      - .env
+    environment:
+      - IS_DOCKER=true
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    expose:
+      - ${PORT}:4040
+    ports:
+      - ${PORT}:4040
+    command: sh -c "npm run db:setup && npm run start"
+    depends_on:
+      - postgres
+    restart: always
 
 volumes:
   pgdata:
