@@ -36,7 +36,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   ...(CLIENT_URL.split(',') || 'http://localhost:3000'),
   'http://localhost:3001',
-  'https://localhub.pp.ua',
+  'https://localhub.store',
   PAYMENT_DOMEN || 'https://www.liqpay.ua',
   'http://localhost:3000',
 ];
@@ -81,7 +81,7 @@ app.use(
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: sessionMaxAge,
-      domain: '.localhub.pp.ua',
+      domain: '.localhub.store',
       sameSite: 'lax',
     },
     name: 'sessionId',
