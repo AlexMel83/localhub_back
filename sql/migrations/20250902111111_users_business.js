@@ -36,7 +36,7 @@ export const up = async (knex) => {
       table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
       table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
     });
-    await trx.schema.createTable('stores', (table) => {
+    await trx.schema.createTable('business', (table) => {
       table.increments('id').primary().notNullable();
       table.integer('user_id').notNullable();
       table.string('title', 100).nullable();
@@ -80,7 +80,7 @@ export const up = async (knex) => {
 export const down = async (knex) => {
   const trx = await knex.transaction();
   try {
-    await trx.schema.dropTableIfExists('stores');
+    await trx.schema.dropTableIfExists('business');
     await trx.schema.dropTableIfExists('tokens');
     await trx.schema.dropTableIfExists('users');
     await trx.schema.dropTableIfExists('session');

@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 
-const storesData = [
+const businessData = [
   {
     user_id: 1,
     title: 'Замок князів Острозьких',
@@ -370,13 +370,13 @@ const storesData = [
 ];
 
 export const seed = async (knex) => {
-  const seedExist = await knex('stores').select('*').where({ id: 76 });
+  const seedExist = await knex('business').select('*').where({ id: 76 });
 
   if (!seedExist[0]) {
     const trx = await knex.transaction();
 
     try {
-      await trx('stores').insert(storesData);
+      await trx('business').insert(businessData);
 
       await trx.commit();
     } catch (error) {

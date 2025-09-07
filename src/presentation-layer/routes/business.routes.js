@@ -1,9 +1,9 @@
 import validateMiddleware from '../../middlewares/validate-middleware.js';
 // import authMiddleware from '../../middlewares/auth-middleware.js';
-import storesController from '../controllers/stores-controller.js';
+import businessController from '../controllers/business-controller.js';
 import { query } from 'express-validator';
 
-const validateQueryStores = [
+const validateQueryBusiness = [
   query('id')
     .optional({ checkFalsy: true })
     .isNumeric()
@@ -28,9 +28,9 @@ const validateQueryStores = [
 
 export default function (app) {
   app.get(
-    '/stores',
-    validateQueryStores,
+    '/business',
+    validateQueryBusiness,
     validateMiddleware,
-    storesController.getStores,
+    businessController.getBusiness,
   );
 }
