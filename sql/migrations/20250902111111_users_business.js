@@ -40,7 +40,7 @@ export const up = async (knex) => {
       table.increments('id').primary().notNullable();
       table.integer('user_id').notNullable();
       table.string('title', 100).nullable();
-      table.string('slug', 200).notNullable();
+      table.string('slug', 200).notNullable().unique();
       table.text('description').nullable();
       table.string('type').notNullable().defaultTo('store');
       table.string('address').nullable();

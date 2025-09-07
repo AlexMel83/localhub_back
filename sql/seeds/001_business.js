@@ -370,18 +370,32 @@ const businessData = [
 ];
 
 export const seed = async (knex) => {
-  const seedExist = await knex('business').select('*').where({ id: 76 });
+  // Отримуємо всі slug із businessData
+  const slugs = businessData.map((item) => item.slug);
 
-  if (!seedExist[0]) {
+  // Перевіряємо, чи є хоча б один із slug у таблиці
+  const existingRecords = await knex('business')
+    .whereIn('slug', slugs)
+    .select('slug')
+    .first();
+
+  if (!existingRecords) {
     const trx = await knex.transaction();
-
     try {
       await trx('business').insert(businessData);
-
       await trx.commit();
+      console.log(
+        'Seeding completed: inserted',
+        businessData.length,
+        'records into business table.',
+      );
     } catch (error) {
       await trx.rollback();
-      throw Error('Failed migration for fill seed data', error);
+      throw new Error(`Failed seeding business data: ${error.message}`);
     }
+  } else {
+    console.log(
+      'Seeding skipped: business table already contains records with slugs from businessData.',
+    );
   }
 };
