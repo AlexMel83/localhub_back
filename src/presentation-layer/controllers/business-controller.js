@@ -32,6 +32,20 @@ class businessController {
       return res.json(ApiError.IntServError(error.message));
     }
   }
+  async createBusiness(req, res) {
+    const business = req.body;
+    console.log('BUSINESS: ', business);
+    try {
+      const response = await businessModel.createBusiness(business);
+      if (!response) {
+        return res.json(ApiError.BadRequest('Business not created'));
+      }
+      return res.json(response);
+    } catch (error) {
+      console.error(error);
+      return res.json(ApiError.IntServError(error.message));
+    }
+  }
 }
 
 export default new businessController();

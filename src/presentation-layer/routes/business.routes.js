@@ -33,4 +33,10 @@ export default function (app) {
     validateMiddleware,
     businessController.getBusiness,
   );
+  app.post(
+    '/business/create',
+    validateQueryBusiness,
+    validateMiddleware,
+    businessController.createBusiness,
+  );
 }

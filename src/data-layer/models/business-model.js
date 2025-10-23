@@ -77,4 +77,16 @@ export default {
       throw error;
     }
   },
+  async createBusiness(business, trx = knex) {
+    try {
+      const result = await trx(businessTable).insert(business);
+      if (!result.length) {
+        return null;
+      }
+      return result[0];
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
 };
