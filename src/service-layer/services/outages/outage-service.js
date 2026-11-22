@@ -13,6 +13,7 @@ const iso = (v) => (v ? toKyivIso(new Date(v)) : null);
 
 const SOURCE_BY_PROVIDER = {
   hoe: null, // use the region's official operator
+  koe: null,
   'svitlo-dtek': { name: 'svitlo.live', url: 'https://svitlo.live' },
   'svitlo-legacy': { name: 'svitlo.live', url: 'https://svitlo.live' },
   'alerts-energy': { name: 'alerts.energy', url: 'https://alerts.energy' },
