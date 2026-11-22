@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint . && prettier -w .",
-    "test": "node --test .",
+    "test": "node --test",
     "precommit": "eslint --config .eslintrc.json --fix \"**/*.{js,cjs,ts}\" --ignore-pattern \"**/*.spec.{js,cjs,ts}\" && prettier --write \"**/*.{js,cjs,ts,css}\"",
     "prepare": "husky install",
     "dev": "cross-env NODE_ENV=development nodemon ./server.js",
