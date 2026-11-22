@@ -143,13 +143,56 @@ export const addressModel = {
     return q;
   },
 
+  /** Settlements whose name contains the query; prefix matches first. */
   async settlements(region, query, trx = knex) {
     const q = trx('outage_addresses')
-      .distinct('settlement', 'rem')
+      .select('settlement', 'rem')
       .where({ region })
-      .orderBy('settlement')
+      .groupBy('settlement', 'rem', 'settlement_norm')
+      .limit(20);
+    if (query) {
+      const like = escapeLike(query);
+      q.andWhere('settlement_norm', 'ilike', `%${like}%`).orderByRaw(
+        'CASE WHEN settlement_norm ILIKE ? THEN 0 ELSE 1 END, settlement',
+        [`${like}%`],
+      );
+    } else {
+      q.orderBy('settlement');
+    }
+    return q;
+  },
+
+  /** Streets of one settlement whose name contains the query; prefix matches first. */
+  async streets({ region, settlement, rem, query }, trx = knex) {
+    const q = trx('outage_addresses')
+      .select('street')
+      .where({ region, settlement })
+      .groupBy('street', 'street_norm')
       .limit(30);
-    if (query) q.andWhere('settlement_norm', 'ilike', `${escapeLike(query)}%`);
+    if (rem) q.andWhere({ rem });
+    if (query) {
+      const like = escapeLike(query);
+      q.andWhere('street_norm', 'ilike', `%${like}%`).orderByRaw(
+        'CASE WHEN street_norm ILIKE ? THEN 0 ELSE 1 END, street_norm',
+        [`${like}%`],
+      );
+    } else {
+      q.orderBy('street_norm');
+    }
+    return q;
+  },
+
+  /** All rows of one street (houses + queue per row). */
+  async streetRows({ region, settlement, rem, street }, trx = knex) {
+    const q = trx('outage_addresses')
+      .select(
+        'houses',
+        'queue',
+        'rem',
+        trx.raw(`to_char(file_date, 'YYYY-MM-DD') as file_date`),
+      )
+      .where({ region, settlement, street });
+    if (rem) q.andWhere({ rem });
     return q;
   },
 };

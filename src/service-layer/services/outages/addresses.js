@@ -6,7 +6,7 @@ import { normalizeQueue, compareQueues } from './schedule.js';
 import { HOE_URL } from './providers/hoe.js';
 
 const STREET_PREFIX_RE =
-  /^(вул(иця)?|пров(улок)?|просп(ект)?|пр-т|пл(оща)?|б(ульв|-р)(ар)?|бульвар|туп(ик)?|узвіз|шосе|проїзд|мкр|мікрорайон|в'їзд|майдан|наб(ережна)?)\.?\s+/i;
+  /^(вул(иця)?|пров(улок)?|просп(ект)?|пр-т|пл(оща)?|бул(ьв(ар)?)?|б-р|туп(ик)?|узвіз|шосе|проїзд|мкр|мікрорайон|в'їзд|майдан|наб(ережна)?)(\.\s*|\s+)/i;
 
 /** Lowercase, unified apostrophes and letters, no punctuation noise. */
 export function normText(value) {
@@ -155,4 +155,43 @@ export function groupMatches(rows, house) {
     .map((g) => ({ ...g, queues: [...g.queues].sort(compareQueues) }))
     .sort((a, b) => a.settlement.localeCompare(b.settlement, 'uk') || a.street.localeCompare(b.street, 'uk'))
     .slice(0, 20);
+}
+
+/** Natural house order: 1, 1а, 2, 10, 10/1, 21а ... */
+export function compareHouses(a, b) {
+  const pa = /^(\d+)(.*)$/.exec(a);
+  const pb = /^(\d+)(.*)$/.exec(b);
+  if (pa && pb) {
+    return Number(pa[1]) - Number(pb[1]) || pa[2].localeCompare(pb[2], 'uk');
+  }
+  if (pa) return -1;
+  if (pb) return 1;
+  return a.localeCompare(b, 'uk');
+}
+
+/**
+ * Houses of a street with their queues, plus the queues for one house.
+ * @param {{ houses: string[], queue: string, rem: string, file_date: string|null }[]} rows
+ */
+export function streetHouses(rows, house) {
+  const byHouse = new Map();
+  for (const r of rows) {
+    for (const h of r.houses) {
+      if (!byHouse.has(h)) byHouse.set(h, new Set());
+      byHouse.get(h).add(r.queue);
+    }
+  }
+  const houses = [...byHouse.keys()].sort(compareHouses);
+  const wanted = house ? normHouse(house) : null;
+  const queues = wanted
+    ? [...(byHouse.get(wanted) ?? [])].sort(compareQueues)
+    : [...new Set(rows.map((r) => r.queue))].sort(compareQueues);
+  return {
+    houses,
+    house: wanted,
+    found: wanted ? byHouse.has(wanted) : rows.length > 0,
+    queues,
+    rem: rows[0]?.rem ?? null,
+    fileDate: rows[0]?.file_date ?? null,
+  };
 }
