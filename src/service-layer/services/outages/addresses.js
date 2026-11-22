@@ -6,7 +6,7 @@ import { normalizeQueue, compareQueues } from './schedule.js';
 import { HOE_URL } from './providers/hoe.js';
 
 const STREET_PREFIX_RE =
-  /^(вул(иця)?|пров(улок)?|просп(ект)?|пр-т|пл(оща)?|бул(ьв(ар)?)?|б-р|туп(ик)?|узвіз|шосе|проїзд|мкр|мікрорайон|в'їзд|майдан|наб(ережна)?)(.s*|s+)/i;
+  /^(вул(иця)?|пров(улок)?|просп(ект)?|пр-т|пл(оща)?|бул(ьв(ар)?)?|б-р|туп(ик)?|узвіз|шосе|проїзд|мкр|мікрорайон|в'їзд|майдан|наб(ережна)?)(\.\s*|\s+)/i;
 
 /** Lowercase, unified apostrophes and letters, no punctuation noise. */
 export function normText(value) {
