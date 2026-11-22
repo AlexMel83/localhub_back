@@ -29,7 +29,7 @@ services:
       - ./:/app
       - /app/node_modules
     expose:
-      - ${PORT}:4040
+      - ${PORT}
     ports:
       - ${PORT}:4040
     depends_on:
