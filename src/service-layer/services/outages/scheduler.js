@@ -8,8 +8,26 @@ import { importAddressFiles } from './address-import.js';
 import { collectOnce, shouldRunAt } from './collector.js';
 import { invalidate } from './outage-service.js';
 import { TZ } from './time.js';
+import telegramModel from '../../../data-layer/models/telegram-model.js';
+import { ensureWebhook, isTelegramEnabled } from '../telegram/api.js';
+import { runNotifier } from '../telegram/telegram-service.js';
 
 const LOCK_KEY = 6801202611; // arbitrary, stable
+const NOTIFIER_LOCK_KEY = 6801202612;
+let notifying = false;
+
+export async function runTelegramNotifier() {
+  if (notifying) return;
+  notifying = true;
+  try {
+    const result = await outageModel.withAdvisoryLock(NOTIFIER_LOCK_KEY, () => runNotifier());
+    if (result?.sent || result?.failed) console.log(`[telegram] alerts: ${JSON.stringify(result)}`);
+  } catch (error) {
+    console.error('[telegram] notifier failed:', error.message);
+  } finally {
+    notifying = false;
+  }
+}
 let running = false;
 
 export async function runCollector(reason = 'cron') {
@@ -59,6 +77,13 @@ export function startOutageScheduler() {
   setTimeout(async () => {
     if ((await addressModel.count().catch(() => 1)) === 0) runAddressImport('initial');
   }, 30_000).unref();
+  if (isTelegramEnabled()) {
+    cron.schedule('* * * * *', () => runTelegramNotifier());
+    cron.schedule('23 3 * * *', () => telegramModel.pruneSent().catch(() => {}), { timezone: TZ });
+    ensureWebhook()
+      .then((ok) => console.log(ok ? '[telegram] webhook registered' : '[telegram] TELEGRAM_WEBHOOK_URL not set'))
+      .catch((error) => console.error('[telegram] webhook setup failed:', error.message));
+  }
   console.log('[outages] collector scheduled');
   return task;
 }
