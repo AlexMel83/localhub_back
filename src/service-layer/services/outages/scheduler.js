@@ -5,6 +5,7 @@
 import cron from 'node-cron';
 import outageModel, { addressModel } from '../../../data-layer/models/outage-model.js';
 import { importAddressFiles } from './address-import.js';
+import { importKoeAddresses } from './koe-addresses.js';
 import { collectOnce, shouldRunAt } from './collector.js';
 import { invalidate } from './outage-service.js';
 import { TZ } from './time.js';
@@ -60,6 +61,18 @@ export async function runAddressImport(reason = 'manual') {
   }
 }
 
+/** Kharkivoblenergo PDF (bundled copy or a given file); skipped when unchanged. */
+export async function runKoeAddressImport(reason = 'manual', path) {
+  try {
+    const result = await importKoeAddresses({ model: addressModel, ...(path ? { path } : {}) });
+    console.log(`[outages] Kharkiv address import (${reason}): ${JSON.stringify(result)}`);
+    return result;
+  } catch (error) {
+    console.error('[outages] Kharkiv address import failed:', error.message);
+    return { error: error.message };
+  }
+}
+
 export function startOutageScheduler() {
   if (process.env.OUTAGES_COLLECTOR_ENABLED !== 'true') {
     console.log('[outages] collector disabled (OUTAGES_COLLECTOR_ENABLED != true)');
@@ -75,7 +88,8 @@ export function startOutageScheduler() {
   cron.schedule('17 3 * * *', () => outageModel.pruneFetchLog().catch(() => {}), { timezone: TZ });
   cron.schedule('40 4 * * *', () => runAddressImport('daily'), { timezone: TZ });
   setTimeout(async () => {
-    if ((await addressModel.count().catch(() => 1)) === 0) runAddressImport('initial');
+    if ((await addressModel.count().catch(() => 1)) === 0) await runAddressImport('initial');
+    await runKoeAddressImport('startup');
   }, 30_000).unref();
   if (isTelegramEnabled()) {
     cron.schedule('* * * * *', () => runTelegramNotifier());

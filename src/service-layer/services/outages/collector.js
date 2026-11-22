@@ -5,6 +5,7 @@ import { REGIONS } from './regions.js';
 import { addDays, kyivDate } from './time.js';
 import { regionState, slotsSignature } from './schedule.js';
 import { fetchHoe, parseHoeBlocks, resolveHoePlans, hoeRegionDay } from './providers/hoe.js';
+import { fetchKoe, koeRegionDay, resolveKoe } from './providers/koe.js';
 import {
   DTEK_URL,
   LEGACY_URL,
@@ -63,15 +64,16 @@ async function timed(provider, fn, log) {
 
 /**
  * @param {{ now?: Date, model: ReturnType<typeof import('../../../data-layer/models/outage-model.js')['default']>,
- *   fetchers?: { hoe?: Function, dtek?: Function, legacy?: Function }, onChange?: Function }} opts
+ *   fetchers?: { hoe?: Function, koe?: Function, dtek?: Function, legacy?: Function }, onChange?: Function }} opts
  */
 export async function collectOnce({ now = new Date(), model, fetchers = {}, onChange } = {}) {
   const today = kyivDate(now);
   const dates = [today, addDays(today, 1)];
   const log = (entry) => model.logFetch(entry).catch(() => {});
 
-  const [hoe, dtek, legacy] = await Promise.all([
+  const [hoe, koe, dtek, legacy] = await Promise.all([
     timed('hoe', fetchers.hoe ?? fetchHoe, log),
+    timed('koe', fetchers.koe ?? fetchKoe, log),
     timed('svitlo-dtek', fetchers.dtek ?? (() => fetchSvitlo(DTEK_URL)), log),
     timed('svitlo-legacy', fetchers.legacy ?? (() => fetchSvitlo(LEGACY_URL)), log),
   ]);
@@ -85,13 +87,29 @@ export async function collectOnce({ now = new Date(), model, fetchers = {}, onCh
     }
   }
 
+  let koeResolved = null;
+  if (koe?.html) {
+    try {
+      koeResolved = resolveKoe(koe.html);
+    } catch (error) {
+      await log({ provider: 'koe-parse', ok: false, error: String(error.message) });
+    }
+  }
+
+  /** Official operator candidate for a region and date. */
+  const official = (region, date, ctx) => {
+    if (region.operator.key === 'hoe' && hoePlans) return hoeRegionDay(hoePlans, date, ctx);
+    if (region.operator.key === 'koe' && koeResolved) return koeRegionDay(koeResolved, date, ctx);
+    return null;
+  };
+
   const summary = { stored: 0, unchanged: 0, missing: 0 };
   for (const region of REGIONS) {
     let regionOk = false;
     for (const date of dates) {
       const ctx = { region: region.slug };
       const candidates = [
-        region.official && hoePlans ? hoeRegionDay(hoePlans, date, ctx) : null,
+        region.official ? official(region, date, ctx) : null,
         dtek && region.dtekCpu
           ? normalizeSvitloRegion(dtek.payload, region.dtekCpu, date, {
               ...ctx,

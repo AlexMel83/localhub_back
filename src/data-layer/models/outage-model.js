@@ -101,7 +101,8 @@ export const addressModel = {
           rows.slice(i, i + 1000).map((r) => ({
             ...r,
             region: meta.region,
-            rem: meta.rem,
+            // Files listing several districts carry the district per row.
+            rem: r.rem ?? meta.rem,
             file_url: meta.url,
             file_date: meta.fileDate,
           })),

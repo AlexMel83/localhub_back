@@ -156,7 +156,7 @@ export function resolveHoePlans(blocks) {
 }
 
 /** Normalized RegionDay for one date, or null when HOE has no plan for it. */
-export function hoeRegionDay(plans, date, { region, sourceUpdatedAt = null }) {
+export function hoeRegionDay(plans, date, { region, sourceUpdatedAt = null, provider = 'hoe' }) {
   const plan = plans.get(date);
   if (!plan) return null;
   const queues = HOE_QUEUES.filter((q) => plan.slots[q]).map((q) =>
@@ -167,7 +167,7 @@ export function hoeRegionDay(plans, date, { region, sourceUpdatedAt = null }) {
   return {
     region,
     date,
-    provider: 'hoe',
+    provider,
     emergency: plan.emergency,
     sourceUpdatedAt,
     queues,

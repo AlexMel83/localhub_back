@@ -37,6 +37,7 @@ function memoryModel() {
 
 const fetchers = {
   hoe: async () => ({ html: fx('hoe-2026-11-22.html'), status: 200 }),
+  koe: async () => ({ html: fx('koe-telegram-2026-11-22.html'), status: 200 }),
   dtek: async () => ({ ...parseSvitloPayload(fx('svitlo-dtek-2026-11-22.json')), status: 200 }),
   legacy: async () => ({ ...parseSvitloPayload(fx('svitlo-legacy-2026-11-22.json')), status: 200 }),
 };
@@ -54,6 +55,10 @@ test('first run stores today from HOE and tomorrow from svitlo; second run is a 
   assert.ok(tomorrow.queues.every((q) => q.publishedState === 'not_published'));
   assert.equal(model.status.get('khmelnytska-oblast').ok, true);
   assert.ok(changed.includes('khmelnytska-oblast/2026-11-22'));
+
+  const kharkiv = model.snapshots.find((s) => s.region === 'kharkivska-oblast' && s.date === '2026-11-22');
+  assert.equal(kharkiv.provider, 'koe');
+  assert.equal(kharkiv.emergency, true);
 
   const second = await collectOnce({ now: NOW, model, fetchers });
   assert.equal(second.stored, 0);
@@ -84,7 +89,7 @@ test('all sources down: nothing stored, regions marked failed', async () => {
   const boom = async () => {
     throw new Error('offline');
   };
-  const res = await collectOnce({ now: NOW, model, fetchers: { hoe: boom, dtek: boom, legacy: boom } });
+  const res = await collectOnce({ now: NOW, model, fetchers: { hoe: boom, koe: boom, dtek: boom, legacy: boom } });
   assert.equal(res.stored, 0);
   assert.equal(model.status.get('khmelnytska-oblast').ok, false);
 });

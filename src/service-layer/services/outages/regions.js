@@ -34,6 +34,20 @@ export const REGIONS = [
     },
     official: true,
   },
+  {
+    slug: 'kharkivska-oblast',
+    nameUk: 'Харківська область',
+    nameEn: 'Kharkiv Oblast',
+    katottg: null,
+    legacyCpu: 'harkivska-oblast',
+    dtekCpu: 'kharkivska-oblast',
+    operator: {
+      key: 'koe',
+      name: 'АТ «Харківобленерго»',
+      url: 'https://t.me/kharkivenergy',
+    },
+    official: true,
+  },
   ...[
     ['vinnytska-oblast', 'Вінницька область', 'Vinnytsia Oblast', 'vinnitska-oblast', null],
     ['volynska-oblast', 'Волинська область', 'Volyn Oblast', 'volinska-oblast', null],
@@ -52,7 +66,6 @@ export const REGIONS = [
     ['rivnenska-oblast', 'Рівненська область', 'Rivne Oblast', 'rivnenska-oblast', 'rivnenska-oblast'],
     ['sumska-oblast', 'Сумська область', 'Sumy Oblast', 'sumska-oblast', null],
     ['ternopilska-oblast', 'Тернопільська область', 'Ternopil Oblast', 'ternopilska-oblast', 'ternopilska-oblast'],
-    ['kharkivska-oblast', 'Харківська область', 'Kharkiv Oblast', 'harkivska-oblast', 'kharkivska-oblast'],
     ['cherkaska-oblast', 'Черкаська область', 'Cherkasy Oblast', 'cherkaska-oblast', 'cherkaska-oblast'],
     ['chernivetska-oblast', 'Чернівецька область', 'Chernivtsi Oblast', 'chernivetska-oblast', 'chernivetska-oblast'],
     ['chernihivska-oblast', 'Чернігівська область', 'Chernihiv Oblast', 'chernigivska-oblast', 'chernihivska-oblast'],
