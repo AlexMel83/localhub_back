@@ -95,3 +95,23 @@ test('importAddressFiles skips unchanged files and reports failures', async () =
   assert.equal(stored[0][0].rem, 'A РЕМ');
   assert.equal(stored[0][0].fileDate, '2026-10-09');
 });
+
+test('streetHouses lists houses naturally and resolves a house to its queues', async () => {
+  const { streetHouses, compareHouses } = await import(
+    '../../src/service-layer/services/outages/addresses.js'
+  );
+  assert.deepEqual(['10', '2', '1а', '10/1', '1', 'б/н'].sort(compareHouses), ['1', '1а', '2', '10', '10/1', 'б/н']);
+  const rows = [
+    { houses: ['7', '9', '21а'], queue: '5.1', rem: 'Старокостянтинівський РЕМ', file_date: '2026-10-09' },
+    { houses: ['7', '11'], queue: '1.1', rem: 'Старокостянтинівський РЕМ', file_date: '2026-10-09' },
+  ];
+  const all = streetHouses(rows, null);
+  assert.deepEqual(all.houses, ['7', '9', '11', '21а']);
+  assert.deepEqual(all.queues, ['1.1', '5.1']);
+  const one = streetHouses(rows, '21 А');
+  assert.equal(one.house, '21а');
+  assert.equal(one.found, true);
+  assert.deepEqual(one.queues, ['5.1']);
+  assert.deepEqual(streetHouses(rows, '7').queues, ['1.1', '5.1']);
+  assert.equal(streetHouses(rows, '99').found, false);
+});

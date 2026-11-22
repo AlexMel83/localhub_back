@@ -157,3 +157,21 @@ export async function listSettlements(regionSlug, q) {
     addressModel.settlements(regionSlug, normText(q)),
   );
 }
+
+export async function listStreets(regionSlug, { settlement, rem, q }) {
+  const { addressModel } = await import('../../../data-layer/models/outage-model.js');
+  const { normStreet } = await import('./addresses.js');
+  const query = normStreet(q ?? '');
+  return cached(`streets:${regionSlug}:${settlement}|${rem ?? ''}|${query}`, async () =>
+    (await addressModel.streets({ region: regionSlug, settlement, rem, query })).map((r) => r.street),
+  );
+}
+
+export async function lookupHouse(regionSlug, { settlement, rem, street, house }) {
+  const { addressModel } = await import('../../../data-layer/models/outage-model.js');
+  const { streetHouses } = await import('./addresses.js');
+  const rows = await cached(`street:${regionSlug}:${settlement}|${rem ?? ''}|${street}`, () =>
+    addressModel.streetRows({ region: regionSlug, settlement, rem, street }),
+  );
+  return { settlement, street, ...streetHouses(rows, house) };
+}
