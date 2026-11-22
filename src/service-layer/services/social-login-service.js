@@ -81,10 +81,9 @@ class SocialLoginService {
         trx,
         res,
       );
-      res.cookie('refreshToken', tokens.refreshToken, {
-        ...rFcookieOptions,
-        domain: '.memory.pp.ua',
-      });
+      // Same host-only cookie as e-mail sign-in (token-service), so /refresh works
+      // after a social login too. The old '.memory.pp.ua' domain was rejected by browsers.
+      res.cookie('refreshToken', tokens.refreshToken, rFcookieOptions);
 
       await trx.commit();
 
