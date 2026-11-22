@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint . && prettier -w .",
-    "test": "node --test .",
+    "test": "node --test",
     "precommit": "eslint --config .eslintrc.json --fix \"**/*.{js,cjs,ts}\" --ignore-pattern \"**/*.spec.{js,cjs,ts}\" && prettier --write \"**/*.{js,cjs,ts,css}\"",
     "prepare": "husky install",
     "dev": "cross-env NODE_ENV=development nodemon ./server.js",
@@ -17,7 +17,8 @@
     "db:setup": "cd ./sql/ && knex migrate:latest && knex seed:run",
     "devdb:clean": "cd ./sql/ && cross-env NODE_ENV=development ./sql/knex migrate:rollback",
     "devdb:setup": "cd ./sql/ && cross-env NODE_ENV=development ./sql/knex migrate:latest && cross-env NODE_ENV=development knex seed:run",
-    "knex": "knex --knexfile ./sql/knexfile.js"
+    "knex": "knex --knexfile ./sql/knexfile.js",
+    "outages:addresses": "node scripts/import-outage-addresses.js"
   },
   "devDependencies": {
     "@babel/core": "^7.23.2",
@@ -36,13 +37,16 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.2.0",
     "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
+    "exceljs": "^4.4.0",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.7.5",
     "express-session": "^1.18.1",
     "express-validator": "^7.0.1",
     "ipsp-js-sdk": "^2.0.11-alpha.1",
@@ -52,6 +56,7 @@
     "moment-timezone": "^0.5.45",
     "multer": "^1.4.5-lts.1",
     "node-cache": "^5.1.2",
+    "node-cron": "^4.6.0",
     "node-geocoder": "^4.3.0",
     "node-pg-migrate": "^7.5.2",
     "nodemailer": "^6.9.7",
@@ -60,5 +65,11 @@
     "set-value": "^4.1.0",
     "update": "^0.7.4",
     "uuid": "^10.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --config .eslintrc.json --fix",
+      "prettier --write"
+    ]
   }
 }

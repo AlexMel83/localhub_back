@@ -10,6 +10,7 @@ import http from 'http';
 import cors from 'cors';
 import pg from 'pg';
 import pgSession from 'connect-pg-simple';
+import { startOutageScheduler } from './src/service-layer/services/outages/scheduler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,7 +37,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   ...(CLIENT_URL.split(',') || 'http://localhost:3000'),
   'http://localhost:3001',
-  'https://localhub.store',
+  'https://json63.pp.ua',
   PAYMENT_DOMEN || 'https://www.liqpay.ua',
   'http://localhost:3000',
 ];
@@ -81,7 +82,7 @@ app.use(
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: sessionMaxAge,
-      domain: '.localhub.store',
+      domain: process.env.COOKIE_DOMAIN || undefined,
       sameSite: 'lax',
     },
     name: 'sessionId',
@@ -100,3 +101,5 @@ app.use((req, res, next) => {
 server.listen(PORT | 4040, () => {
   console.log(`Server is running on port ${PORT | 4040}.`);
 });
+
+startOutageScheduler();

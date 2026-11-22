@@ -2,6 +2,7 @@ import uploadsRouteInit from './uploads.routes.js';
 import authRouteInit from './auth.routes.js';
 import businessRouteInit from './business.routes.js';
 import geoQueriesRouteInit from './geo-queries.routes.js';
+import outagesRouteInit from './outages.routes.js';
 
 const routeInit = (app, express) => {
   app.use(express.urlencoded({ extended: true }));
@@ -10,6 +11,7 @@ const routeInit = (app, express) => {
   businessRouteInit(app);
   uploadsRouteInit(app);
   geoQueriesRouteInit(app);
+  outagesRouteInit(app);
 };
 
 export default routeInit;
