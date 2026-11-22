@@ -134,3 +134,26 @@ export async function health() {
     fetches: fetches.map((f) => ({ ...f, at: iso(f.at) })),
   };
 }
+
+export async function searchAddress(regionSlug, q, settlement) {
+  const { addressModel } = await import('../../../data-layer/models/outage-model.js');
+  const { parseAddressQuery, groupMatches, normText } = await import('./addresses.js');
+  const query = parseAddressQuery(q ?? '');
+  if (query.street.length < 2) return { query, matches: [] };
+  return cached(`address:${regionSlug}:${normText(settlement)}|${query.street}|${query.house}`, async () => {
+    const rows = await addressModel.search({
+      region: regionSlug,
+      street: query.street,
+      settlement: settlement ? normText(settlement) : null,
+    });
+    return { query, matches: groupMatches(rows, query.house) };
+  });
+}
+
+export async function listSettlements(regionSlug, q) {
+  const { addressModel } = await import('../../../data-layer/models/outage-model.js');
+  const { normText } = await import('./addresses.js');
+  return cached(`settlements:${regionSlug}:${normText(q)}`, () =>
+    addressModel.settlements(regionSlug, normText(q)),
+  );
+}

@@ -39,3 +39,16 @@ export async function politeGet(url, { timeoutMs = 20000, conditional = true } =
   if (etag || lastModified) validators.set(url, { etag, lastModified });
   return { status: res.status, notModified: false, text: await res.text(), headers: res.headers, ms };
 }
+
+/** GET a binary file; returns null when unchanged since `lastModified`. */
+export async function politeGetBuffer(url, { lastModified, timeoutMs = 60000 } = {}) {
+  const headers = { 'User-Agent': DEFAULT_UA, Accept: '*/*' };
+  if (lastModified) headers['If-Modified-Since'] = lastModified;
+  const res = await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) });
+  if (res.status === 304) return null;
+  if (!res.ok) throw new HttpError(url, res.status);
+  return {
+    buffer: Buffer.from(await res.arrayBuffer()),
+    lastModified: res.headers.get('last-modified'),
+  };
+}

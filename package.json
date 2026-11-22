@@ -17,7 +17,8 @@
     "db:setup": "cd ./sql/ && knex migrate:latest && knex seed:run",
     "devdb:clean": "cd ./sql/ && cross-env NODE_ENV=development ./sql/knex migrate:rollback",
     "devdb:setup": "cd ./sql/ && cross-env NODE_ENV=development ./sql/knex migrate:latest && cross-env NODE_ENV=development knex seed:run",
-    "knex": "knex --knexfile ./sql/knexfile.js"
+    "knex": "knex --knexfile ./sql/knexfile.js",
+    "outages:addresses": "node scripts/import-outage-addresses.js"
   },
   "devDependencies": {
     "@babel/core": "^7.23.2",

@@ -84,3 +84,72 @@ export default {
     }
   },
 };
+
+const escapeLike = (s) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+export const addressModel = {
+  async fileMeta(url, trx = knex) {
+    return (await trx('outage_address_files').where({ url }).first()) ?? null;
+  },
+
+  /** Replaces all rows of one source file atomically. */
+  async replaceFile(meta, rows) {
+    await knex.transaction(async (trx) => {
+      await trx('outage_addresses').where({ file_url: meta.url }).del();
+      for (let i = 0; i < rows.length; i += 1000) {
+        await trx('outage_addresses').insert(
+          rows.slice(i, i + 1000).map((r) => ({
+            ...r,
+            region: meta.region,
+            rem: meta.rem,
+            file_url: meta.url,
+            file_date: meta.fileDate,
+          })),
+        );
+      }
+      const patch = {
+        region: meta.region,
+        rem: meta.rem,
+        last_modified: meta.lastModified,
+        rows: rows.length,
+        imported_at: trx.fn.now(),
+      };
+      await trx('outage_address_files')
+        .insert({ url: meta.url, ...patch })
+        .onConflict('url')
+        .merge(patch);
+    });
+  },
+
+  async count(trx = knex) {
+    const [{ count }] = await trx('outage_addresses').count('* as count');
+    return Number(count);
+  },
+
+  async search({ region, street, settlement, limit = 500 }, trx = knex) {
+    const q = trx('outage_addresses')
+      .select(
+        'settlement',
+        'street',
+        'houses',
+        'queue',
+        'rem',
+        trx.raw(`to_char(file_date, 'YYYY-MM-DD') as file_date`),
+      )
+      .where({ region })
+      .andWhere('street_norm', 'ilike', `%${escapeLike(street)}%`)
+      .limit(limit);
+    if (settlement) q.andWhere('settlement_norm', 'ilike', `${escapeLike(settlement)}%`);
+    return q;
+  },
+
+  async settlements(region, query, trx = knex) {
+    const q = trx('outage_addresses')
+      .distinct('settlement', 'rem')
+      .where({ region })
+      .orderBy('settlement')
+      .limit(30);
+    if (query) q.andWhere('settlement_norm', 'ilike', `${escapeLike(query)}%`);
+    return q;
+  },
+};
