@@ -145,9 +145,11 @@ export function regionState(queues, emergency) {
   return 'empty';
 }
 
-/** Compact signature for change detection ("oooffm..."). */
+const SIGNATURE_CHARS = { on: "1", off: "0", maybe: "m", unknown: "?" };
+
+/** Compact signature for change detection, one char per slot ("1100m?..."). */
 export function slotsSignature(slots) {
-  return slots.map((s) => s[0]).join('');
+  return slots.map((s) => SIGNATURE_CHARS[s] ?? "?").join("");
 }
 
 /**

@@ -10,6 +10,7 @@ import http from 'http';
 import cors from 'cors';
 import pg from 'pg';
 import pgSession from 'connect-pg-simple';
+import { startOutageScheduler } from './src/service-layer/services/outages/scheduler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -100,3 +101,5 @@ app.use((req, res, next) => {
 server.listen(PORT | 4040, () => {
   console.log(`Server is running on port ${PORT | 4040}.`);
 });
+
+startOutageScheduler();
