@@ -115,3 +115,16 @@ test('streetHouses lists houses naturally and resolves a house to its queues', a
   assert.deepEqual(streetHouses(rows, '7').queues, ['1.1', '5.1']);
   assert.equal(streetHouses(rows, '99').found, false);
 });
+
+test('normStreet strips abbreviations written without a space', async () => {
+  const { normStreet } = await import('../../src/service-layer/services/outages/addresses.js');
+  assert.equal(normStreet('бул.Острозького'), 'острозького');
+  assert.equal(normStreet('вул.Миру'), 'миру');
+  assert.equal(normStreet('Бульвар Шевченка'), 'шевченка');
+});
+
+test('normStreet keeps names that merely start like an abbreviation', async () => {
+  const { normStreet } = await import('../../src/service-layer/services/outages/addresses.js');
+  assert.equal(normStreet('Вулична'), 'вулична');
+  assert.equal(normStreet('Площанська'), 'площанська');
+});
